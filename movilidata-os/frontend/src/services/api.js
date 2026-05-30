@@ -76,3 +76,40 @@ export async function exportModule(modulo) {
   a.remove()
   URL.revokeObjectURL(url)
 }
+
+// src/services/assistantService.js
+
+const API_URL = "http://localhost:8000/api/assistant"; // Ajusta el puerto si tu backend corre en otro
+
+/**
+ * Envía la pregunta del usuario al asistente de IA en el backend.
+ * @param {string} pregunta - La consulta del ciudadano.
+ * @param {Array} historial - El arreglo con los mensajes previos [{pregunta, respuesta}].
+ */
+export const enviarPreguntaAsistente = async (pregunta, historial = []) => {
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        pregunta: pregunta,
+        historial: historial, // Mantiene el hilo de la conversación (RF-28)
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Error en la respuesta del servidor de Evamaps");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error en enviarPreguntaAsistente:", error);
+    // Retornamos un formato idéntico en caso de fallo para que la UI no se rompa
+    return {
+      respuesta: "Lo siento, hubo un problema de conexión con el servidor local. Por favor, intenta de nuevo.",
+      proveedor: "error"
+    };
+  }
+};

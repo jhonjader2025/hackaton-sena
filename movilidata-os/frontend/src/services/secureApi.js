@@ -1,7 +1,7 @@
 import axios from 'axios'
 import DOMPurify from 'dompurify'
 
-const API_BASE = process.env.REACT_APP_API_URL || ''
+const API_BASE = import.meta.env.VITE_API_URL || ''
 
 const apiClient = axios.create({
   baseURL: API_BASE,

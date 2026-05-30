@@ -1,0 +1,217 @@
+{
+  "accidents": [],
+  "weather": [
+    {
+      "estacion": "Estación SIATA 0",
+      "timestamp": "2026-05-30T03:41:23.968016",
+      "precipitacion_mmh": 2.5,
+      "intensidad": "alta",
+      "temperatura": 28.1,
+      "humedad": 67.2,
+      "viento_kmh": 2.4,
+      "latitud": 6.2486,
+      "longitud": -75.5715
+    },
+    {
+      "estacion": "Estación SIATA 1",
+      "timestamp": "2026-05-30T03:41:23.968084",
+      "precipitacion_mmh": 11.8,
+      "intensidad": "alta",
+      "temperatura": 27.8,
+      "humedad": 57.1,
+      "viento_kmh": 0.7,
+      "latitud": 6.2617,
+      "longitud": -75.5897
+    },
+    {
+      "estacion": "Estación SIATA 2",
+      "timestamp": "2026-05-30T03:41:23.968099",
+      "precipitacion_mmh": 1.6,
+      "intensidad": "moderada",
+      "temperatura": 23.8,
+      "humedad": 76.4,
+      "viento_kmh": 22.5,
+      "latitud": 6.2679,
+      "longitud": -75.5672
+    },
+    {
+      "estacion": "Estación SIATA 3",
+      "timestamp": "2026-05-30T03:41:23.968110",
+      "precipitacion_mmh": 14.6,
+      "intensidad": "alta",
+      "temperatura": 27.3,
+      "humedad": 70.2,
+      "viento_kmh": 3.8,
+      "latitud": 6.2121,
+      "longitud": -75.587
+    }
+  ],
+  "traffic": [
+    {
+      "nombre": "Av. El Poblado",
+      "velocidad_actual": 31.9,
+      "velocidad_historica": 35.4,
+      "densidad": 68,
+      "color_congestion": "yellow",
+      "lat_ini": 6.343005,
+      "lon_ini": -75.532945,
+      "lat_fin": 6.291935,
+      "lon_fin": -75.623533
+    },
+    {
+      "nombre": "Av. Las Vegas",
+      "velocidad_actual": 58.5,
+      "velocidad_historica": 61.3,
+      "densidad": 41,
+      "color_congestion": "green",
+      "lat_ini": 6.306902,
+      "lon_ini": -75.557888,
+      "lat_fin": 6.327776,
+      "lon_fin": -75.582814
+    },
+    {
+      "nombre": "Av. Oriental",
+      "velocidad_actual": 39.6,
+      "velocidad_historica": 41.2,
+      "densidad": 60,
+      "color_congestion": "green",
+      "lat_ini": 6.349579,
+      "lon_ini": -75.649245,
+      "lat_fin": 6.324033,
+      "lon_fin": -75.568547
+    },
+    {
+      "nombre": "Av. Ferrocarril",
+      "velocidad_actual": 56.1,
+      "velocidad_historica": 59.1,
+      "densidad": 43,
+      "color_congestion": "green",
+      "lat_ini": 6.259776,
+      "lon_ini": -75.541553,
+      "lat_fin": 6.214834,
+      "lon_fin": -75.556457
+    },
+    {
+      "nombre": "Av. 33",
+      "velocidad_actual": 63.7,
+      "velocidad_historica": 57.9,
+      "densidad": 36,
+      "color_congestion": "green",
+      "lat_ini": 6.259158,
+      "lon_ini": -75.58722,
+      "lat_fin": 6.269442,
+      "lon_fin": -75.597031
+    },
+    {
+      "nombre": "Av. Guayabal",
+      "velocidad_actual": 44.4,
+      "velocidad_historica": 39.7,
+      "densidad": 55,
+      "color_congestion": "green",
+      "lat_ini": 6.321011,
+      "lon_ini": -75.620578,
+      "lat_fin": 6.143656,
+      "lon_fin": -75.564388
+    },
+    {
+      "nombre": "Av. San Juan",
+      "velocidad_actual": 52.2,
+      "velocidad_historica": 55.3,
+      "densidad": 47,
+      "color_congestion": "green",
+      "lat_ini": 6.285623,
+      "lon_ini": -75.647414,
+      "lat_fin": 6.282815,
+      "lon_fin": -75.613071
+    },
+    {
+      "nombre": "Av. Nutibara",
+      "velocidad_actual": 35.3,
+      "velocidad_historica": 34.2,
+      "densidad": 64,
+      "color_congestion": "green",
+      "lat_ini": 6.151116,
+      "lon_ini": -75.613145,
+      "lat_fin": 6.202161,
+      "lon_fin": -75.534971
+    },
+    {
+      "nombre": "Calle 10",
+      "velocidad_actual": 65.7,
+      "velocidad_historica": 73.3,
+      "densidad": 34,
+      "color_congestion": "green",
+      "lat_ini": 6.329719,
+      "lon_ini": -75.583627,
+      "lat_fin": 6.194674,
+      "lon_fin": -75.537549
+    },
+    {
+      "nombre": "Calle 30",
+      "velocidad_actual": 45.7,
+      "velocidad_historica": 50.6,
+      "densidad": 54,
+      "color_congestion": "green",
+      "lat_ini": 6.345584,
+      "lon_ini": -75.620976,
+      "lat_fin": 6.297839,
+      "lon_fin": -75.590784
+    },
+    {
+      "nombre": "Calle 50",
+      "velocidad_actual": 34.0,
+      "velocidad_historica": 34.0,
+      "densidad": 66,
+      "color_congestion": "yellow",
+      "lat_ini": 6.163659,
+      "lon_ini": -75.575091,
+      "lat_fin": 6.153324,
+      "lon_fin": -75.594816
+    },
+    {
+      "nombre": "Circular 1",
+      "velocidad_actual": 39.2,
+      "velocidad_historica": 42.0,
+      "densidad": 60,
+      "color_congestion": "green",
+      "lat_ini": 6.153548,
+      "lon_ini": -75.578685,
+      "lat_fin": 6.142436,
+      "lon_fin": -75.557547
+    },
+    {
+      "nombre": "Transversal Inferior",
+      "velocidad_actual": 58.6,
+      "velocidad_historica": 57.7,
+      "densidad": 41,
+      "color_congestion": "green",
+      "lat_ini": 6.341993,
+      "lon_ini": -75.600708,
+      "lat_fin": 6.332737,
+      "lon_fin": -75.541558
+    },
+    {
+      "nombre": "Autopista Sur",
+      "velocidad_actual": 55.2,
+      "velocidad_historica": 57.4,
+      "densidad": 44,
+      "color_congestion": "green",
+      "lat_ini": 6.24308,
+      "lon_ini": -75.623934,
+      "lat_fin": 6.154806,
+      "lon_fin": -75.605957
+    },
+    {
+      "nombre": "Av. Bolivariana",
+      "velocidad_actual": 42.1,
+      "velocidad_historica": 44.5,
+      "densidad": 57,
+      "color_congestion": "green",
+      "lat_ini": 6.31639,
+      "lon_ini": -75.59608,
+      "lat_fin": 6.335446,
+      "lon_fin": -75.641193
+    }
+  ],
+  "timestamp": "2026-05-30T03:41:24.163506"
+}

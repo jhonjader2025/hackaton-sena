@@ -30,16 +30,26 @@ const initialState = {
 const alertsSlice = createSlice({
   name: 'alerts',
   initialState,
+  reducers: {},
   extraReducers: (builder) => {
     builder
+      .addCase(fetchAlerts.pending, (state) => { state.loading = true; state.error = null })
       .addCase(fetchAlerts.fulfilled, (state, action) => {
+        state.loading = false
         state.active = action.payload.alerts || []
         state.count = action.payload.count || 0
       })
+      .addCase(fetchAlerts.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+      })
+      .addCase(fetchAlertsHistory.pending, (state) => { state.loading = true })
       .addCase(fetchAlertsHistory.fulfilled, (state, action) => {
+        state.loading = false
         state.history = action.payload.history || []
       })
-      .addCase(fetchAlerts.rejected, (state, action) => {
+      .addCase(fetchAlertsHistory.rejected, (state, action) => {
+        state.loading = false
         state.error = action.payload
       })
   }

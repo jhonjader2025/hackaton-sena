@@ -1,4 +1,4 @@
-const API_BASE = ''
+import { apiClient, validateInput, validateCoordinates } from './secureApi'
 
 function handleResponse(response) {
   if (!response.ok) {
@@ -36,19 +36,22 @@ export async function getPrediction(fecha, hora) {
 }
 
 export async function sendSafeRoute(origen, destino) {
+  const [lat1, lon1] = validateCoordinates(origen[0], origen[1])
+  const [lat2, lon2] = validateCoordinates(destino[0], destino[1])
   const resp = await fetch('/api/safe-route', {
     method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({origen, destino})
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ origen: [lat1, lon1], destino: [lat2, lon2] })
   })
   return handleResponse(resp)
 }
 
 export async function sendAssistant(pregunta) {
+  const sanitized = validateInput(pregunta)
   const resp = await fetch('/api/assistant', {
     method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({pregunta})
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pregunta: sanitized })
   })
   return handleResponse(resp)
 }
@@ -76,6 +79,8 @@ export async function exportModule(modulo) {
   a.remove()
   URL.revokeObjectURL(url)
 }
+
+export { apiClient }
 
 // src/services/assistantService.js
 

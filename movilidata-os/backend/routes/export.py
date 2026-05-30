@@ -1,15 +1,16 @@
+import os, csv
+from io import StringIO
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
-from io import StringIO
-import csv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from .traffic import traffic_state, get_active_alerts
-from .accidents import DB_URL, Accident
+from models import Accident
 from .prediction import get_prediction
 
 router = APIRouter()
 
+DB_URL = os.getenv('DATABASE_URL', 'sqlite:///./movilidata.db')
 engine = create_engine(DB_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(bind=engine)
 

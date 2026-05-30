@@ -1,13 +1,17 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field, validator
-from typing import List
-import os, requests
+from typing import List, Optional
+import os, requests, math, random
 from pathlib import Path
-import math
-import csv
 from datetime import datetime
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 router = APIRouter()
+
+DB_URL = os.getenv('DATABASE_URL', 'sqlite:///./movilidata.db')
+engine = create_engine(DB_URL, connect_args={"check_same_thread": False})
+SessionLocal = sessionmaker(bind=engine)
 
 class Coordinates(BaseModel):
     lat: float = Field(..., ge=4.5, le=6.5)
@@ -18,7 +22,6 @@ class Coordinates(BaseModel):
         if not isinstance(v, (int, float)):
             raise ValueError('Coordenada debe ser numérica')
         return float(v)
-
 
 class RouteRequest(BaseModel):
     origen: List[float] = Field(..., min_items=2, max_items=2)
@@ -33,53 +36,61 @@ class RouteRequest(BaseModel):
             raise ValueError('Coordenadas fuera del área de Medellín')
         return v
 
-
 def distance(a, b):
     return math.hypot(a[0] - b[0], a[1] - b[1])
 
-
-def compute_risk_centroids(n=5):
-    datafile = Path(__file__).parent.parent / 'data' / 'accidents_sample.csv'
-    if not datafile.exists():
-        return []
-    stats = {}
+def get_weather_factor():
+    from models import CondicionClimatica
+    session = SessionLocal()
     try:
-        with open(datafile, newline='', encoding='utf-8') as f:
-            reader = csv.DictReader(f)
-            for r in reader:
-                c = r.get('comuna') or 'NA'
-                lat = float(r.get('lat', 0))
-                lon = float(r.get('lon', 0))
-                if lat == 0 or lon == 0:
-                    continue
-                if c not in stats:
-                    stats[c] = {'count': 0, 'lat_sum': 0, 'lon_sum': 0}
-                stats[c]['count'] += 1
-                stats[c]['lat_sum'] += lat
-                stats[c]['lon_sum'] += lon
-        items = []
-        for k, v in stats.items():
-            items.append({
-                'name': k,
-                'count': v['count'],
-                'lat': v['lat_sum'] / v['count'],
-                'lon': v['lon_sum'] / v['count'],
-                'risk_level': 'alta' if v['count'] > 50 else 'media'
-            })
-        items.sort(key=lambda x: x['count'], reverse=True)
-        return items[:n]
-    except Exception as e:
-        return []
+        latest = session.query(CondicionClimatica).order_by(CondicionClimatica.timestamp.desc()).first()
+        if latest:
+            intensidad = 0
+            if latest.intensidad_label == 'alta':
+                intensidad = 1.0
+            elif latest.intensidad_label == 'moderada':
+                intensidad = 0.5
+            elif latest.precipitacion_mmh > 0:
+                intensidad = min(latest.precipitacion_mmh / 20, 1.0)
+            return {'factor': intensidad, 'precipitacion': latest.precipitacion_mmh, 'intensidad': latest.intensidad_label}
+        return {'factor': 0.0, 'precipitacion': 0, 'intensidad': 'baja'}
+    finally:
+        session.close()
 
+def get_risk_zones():
+    from models import ZonaRiesgo, CondicionClimatica
+    session = SessionLocal()
+    try:
+        zonas = session.query(ZonaRiesgo).order_by(ZonaRiesgo.indice_riesgo.desc()).all()
+        weather = session.query(CondicionClimatica).order_by(CondicionClimatica.timestamp.desc()).first()
+        coef_lluvia = 0.5
+        intensidad_norm = 0
+        if weather and weather.precipitacion_mmh > 0:
+            intensidad_norm = min(weather.precipitacion_mmh / 20, 1.0)
+        result = []
+        for z in zonas:
+            ir_lluvia = z.indice_riesgo * (1 + coef_lluvia * intensidad_norm)
+            level = 'crítico' if ir_lluvia > 0.7 else 'alta' if ir_lluvia > 0.5 else 'media' if ir_lluvia > 0.3 else 'baja'
+            result.append({
+                'name': z.nombre_sector,
+                'indice_riesgo': z.indice_riesgo,
+                'ir_lluvia': round(ir_lluvia, 4),
+                'risk_level': 'alta' if ir_lluvia > 0.5 else 'media',
+                'lat': z.centroide_lat or (6.24 + random.uniform(-0.05, 0.05)),
+                'lon': z.centroide_lon or (-75.58 + random.uniform(-0.05, 0.05)),
+            })
+        return result
+    finally:
+        session.close()
 
 @router.post('/api/safe-route')
 def safe_route(req: RouteRequest):
-    """Calcula una ruta segura evitando zonas de alta accidentalidad"""
     try:
         origin = req.origen
         dest = req.destino
         gkey = os.getenv('GOOGLE_MAPS_API_KEY')
-        
+        weather = get_weather_factor()
+
         if gkey:
             try:
                 params = {
@@ -88,30 +99,39 @@ def safe_route(req: RouteRequest):
                     'key': gkey,
                     'alternatives': 'true'
                 }
-                r = requests.get('https://maps.googleapis.com/maps/api/directions/json', 
+                r = requests.get('https://maps.googleapis.com/maps/api/directions/json',
                                params=params, timeout=8)
                 if r.ok and r.json().get('routes'):
-                    return r.json()
+                    data = r.json()
+                    data['weather_factor'] = weather
+                    data['metadata'] = {
+                        'fuente': 'Google Maps + SIATA',
+                        'avoid_zones': [],
+                        'risk_levels': {},
+                        'timestamp': datetime.utcnow().isoformat()
+                    }
+                    return data
             except Exception:
                 pass
-        
-        # Fallback: ruta simulada evitando zonas de riesgo
-        centroids = compute_risk_centroids(5)
+
+        risk_zones = get_risk_zones()
+        centroids = risk_zones
+
         route = [[origin[1], origin[0]]]
         mid = [(origin[0] + dest[0]) / 2, (origin[1] + dest[1]) / 2]
-        
+
         offset = 0.0
         for c in centroids:
             c_lat, c_lon = c['lat'], c['lon']
-            if distance([c_lat, c_lon], mid) < 0.02:
-                offset = 0.02
-        
+            if c_lat and c_lon and distance([c_lat, c_lon], mid) < 0.025:
+                offset = max(offset, 0.025)
+
         if offset:
             mid = [mid[0] + offset, mid[1] - offset]
-        
+
         route.append([mid[1], mid[0]])
         route.append([dest[1], dest[0]])
-        
+
         return {
             'status': 'OK',
             'routes': [{
@@ -123,10 +143,12 @@ def safe_route(req: RouteRequest):
                     'duration': {'value': 0}
                 }]
             }],
+            'weather_factor': weather,
             'metadata': {
-                'avoid_zones': [c['name'] for c in centroids],
-                'risk_levels': {c['name']: c['risk_level'] for c in centroids},
-                'fuente': 'simulado',
+                'avoid_zones': [c['name'] for c in centroids if c.get('risk_level') == 'alta'],
+                'risk_levels': {c['name']: c['risk_level'] for c in centroids if c.get('name')},
+                'ir_lluvia': {c['name']: c.get('ir_lluvia', 0) for c in centroids if c.get('name')},
+                'fuente': 'simulado + SIATA',
                 'timestamp': datetime.utcnow().isoformat()
             }
         }

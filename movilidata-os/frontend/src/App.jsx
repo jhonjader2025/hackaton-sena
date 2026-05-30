@@ -1,4 +1,10 @@
-import React, { useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import { setActiveTab, setOfflineMode, addNotification } from './redux/slices/uiSlice'
+import { fetchDashboard } from './redux/slices/dashboardSlice'
+import Sidebar from './components/Sidebar'
+import TopBar from './components/TopBar'
+import DetailPanel from './components/DetailPanel'
 import Dashboard from './components/Dashboard'
 import HeatmapAccidents from './components/HeatmapAccidents'
 import TrafficMonitor from './components/TrafficMonitor'
@@ -6,54 +12,93 @@ import SafeRoute from './components/SafeRoute'
 import Prediction from './components/Prediction'
 import Assistant from './components/Assistant'
 import AlertsHistory from './components/AlertsHistory'
+import ToastContainer from './components/ToastContainer'
+import ErrorBoundary from './components/ErrorBoundary'
 
-const sections = [
-  { id: 'dashboard', label: 'Dashboard' },
-  { id: 'accidentes', label: 'Accidentes' },
-  { id: 'trafico', label: 'Tráfico' },
-  { id: 'prediccion', label: 'Predicción' },
-  { id: 'rutas', label: 'Rutas' },
-  { id: 'asistente', label: 'Asistente' }
-]
+const THEME_META = document.querySelector('meta[name="theme-color"]')
+
+function applyTheme(dark) {
+  const action = dark ? 'add' : 'remove'
+  document.documentElement.classList[action]('dark')
+  if (THEME_META) {
+    THEME_META.content = dark ? '#0F172A' : '#F8FAFC'
+  }
+}
 
 export default function App() {
-  const [active, setActive] = useState('dashboard')
+  const dispatch = useDispatch()
+  const { activeTab, darkMode, offlineMode } = useSelector((state) => state.ui)
+  const [detailOpen, setDetailOpen] = useState(false)
+  const [detailContent, setDetailContent] = useState(null)
+  const [detailTitle, setDetailTitle] = useState('')
+
+  useEffect(() => {
+    applyTheme(darkMode)
+  }, [darkMode])
+
+  useEffect(() => {
+    dispatch(fetchDashboard())
+    const id = setInterval(() => dispatch(fetchDashboard()), 60000)
+    return () => clearInterval(id)
+  }, [dispatch])
+
+  useEffect(() => {
+    const handleOnline = () => {
+      dispatch(setOfflineMode(false))
+      dispatch(addNotification({ type: 'success', title: 'Conectado', message: 'La conexión se ha restablecido.' }))
+    }
+    const handleOffline = () => {
+      dispatch(setOfflineMode(true))
+      dispatch(addNotification({ type: 'warning', title: 'Sin conexión', message: 'Mostrando datos en caché.' }))
+    }
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [dispatch])
+
+  const openDetail = useCallback((title, content) => {
+    setDetailTitle(title)
+    setDetailContent(content)
+    setDetailOpen(true)
+  }, [])
+
+  const closeDetail = useCallback(() => {
+    setDetailOpen(false)
+  }, [])
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 text-slate-900">
-      <header className="mb-6 flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
-        <div>
-          <p className="text-sm uppercase tracking-[0.2em] text-slate-500">Movilidata OS</p>
-          <h1 className="mt-2 text-3xl font-semibold">Medellín — Plataforma de movilidad segura</h1>
-          <p className="mt-2 max-w-2xl text-sm text-slate-600">Monitoreo en tiempo real, predicción de riesgo, alertas y rutas más seguras en una interfaz minimalista.</p>
-        </div>
-        <nav className="flex flex-wrap gap-2">
-          {sections.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => setActive(item.id)}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition ${active === item.id ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </nav>
-      </header>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--color-bg)', color: 'var(--color-text)' }}>
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:rounded-xl focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-surface-900 focus:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">
+        Saltar al contenido principal
+      </a>
 
-      <main className="space-y-6">
-        {active === 'dashboard' && (
-          <div className="space-y-6">
-            <Dashboard />
-            <AlertsHistory />
-          </div>
-        )}
-        {active === 'accidentes' && <HeatmapAccidents />}
-        {active === 'trafico' && <TrafficMonitor />}
-        {active === 'prediccion' && <Prediction />}
-        {active === 'rutas' && <SafeRoute />}
-        {active === 'asistente' && <Assistant />}
-      </main>
+      <ToastContainer />
+
+      <div className="flex">
+        <Sidebar />
+        <div className="flex flex-col flex-1 min-h-screen max-w-full">
+          <TopBar />
+          <main
+            id="main-content"
+            className="flex-1 overflow-auto p-4 lg:p-6 space-y-6"
+            role="main"
+          >
+            {activeTab === 'dashboard' && <ErrorBoundary><Dashboard openDetail={openDetail} /></ErrorBoundary>}
+            {activeTab === 'accidentes' && <ErrorBoundary><HeatmapAccidents openDetail={openDetail} /></ErrorBoundary>}
+            {activeTab === 'trafico' && <ErrorBoundary><TrafficMonitor openDetail={openDetail} /></ErrorBoundary>}
+            {activeTab === 'prediccion' && <ErrorBoundary><Prediction /></ErrorBoundary>}
+            {activeTab === 'rutas' && <ErrorBoundary><SafeRoute /></ErrorBoundary>}
+            {activeTab === 'asistente' && <ErrorBoundary><Assistant /></ErrorBoundary>}
+          </main>
+        </div>
+      </div>
+
+      <DetailPanel open={detailOpen} onClose={closeDetail} title={detailTitle}>
+        {detailContent}
+      </DetailPanel>
     </div>
   )
 }

@@ -1,9 +1,19 @@
 {
-  "name": "Movilidata OS",
+  "name": "Movilidata OS — Medellín",
   "short_name": "Movilidata",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "description": "PWA de analítica de movilidad para Medellín",
-  "icons": []
+  "background_color": "#F8FAFC",
+  "theme_color": "#1F2937",
+  "description": "Plataforma unificada de movilidad inteligente para Medellín. Monitoreo en tiempo real, predicción de congestión, rutas seguras y asistente IA.",
+  "lang": "es-CO",
+  "orientation": "any",
+  "categories": ["transportation", "navigation", "utilities"],
+  "icons": [
+    { "src": "/icons/icon-72.svg", "sizes": "72x72", "type": "image/svg+xml" },
+    { "src": "/icons/icon-96.svg", "sizes": "96x96", "type": "image/svg+xml" },
+    { "src": "/icons/icon-144.svg", "sizes": "144x144", "type": "image/svg+xml" },
+    { "src": "/icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" },
+    { "src": "/icons/icon-512.svg", "sizes": "512x512", "type": "image/svg+xml" }
+  ]
 }

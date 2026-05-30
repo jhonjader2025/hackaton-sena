@@ -1,9 +1,30 @@
 <!doctype html>
-<html lang="es">
+<html lang="es-CO">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Movilidata OS - Medellín</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#F8FAFC" />
+    <script>
+      (function() {
+        var darkMode = localStorage.getItem('movilidata-darkMode');
+        if (darkMode === null) {
+          darkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'true' : 'false';
+        }
+        if (darkMode === 'true') {
+          document.documentElement.classList.add('dark');
+          document.querySelector('meta[name="theme-color"]').content = '#0F172A';
+        }
+      })();
+    </script>
+    <meta name="description" content="Plataforma unificada de movilidad inteligente para Medellín. Monitoreo en tiempo real, predicción de congestión, rutas seguras y asistente IA." />
+    <meta name="application-name" content="Movilidata OS" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Movilidata" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/svg+xml" href="/icons/icon-144.svg" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
+    <title>Movilidata OS — Medellín</title>
   </head>
   <body>
     <div id="root"></div>

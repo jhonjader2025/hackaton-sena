@@ -3,21 +3,28 @@ import { apiClient } from '../../services/api'
 
 export const fetchDashboard = createAsyncThunk('dashboard/fetch', async (_, { rejectWithValue }) => {
   try {
-    const [accidents, traffic, weather, alerts, prediction] = await Promise.all([
+    const results = await Promise.allSettled([
       apiClient.get('/api/accidents'),
       apiClient.get('/api/traffic'),
       apiClient.get('/api/weather'),
       apiClient.get('/api/alerts'),
       apiClient.get('/api/prediction')
     ])
-    return {
-      accidentCount: accidents.data.features?.length ?? 0,
-      trafficCount: traffic.data.segments?.length ?? 0,
-      congestionLevel: traffic.data.segments?.filter(s => s.color === 'red').length ?? 0,
-      weather: weather.data,
-      alertCount: alerts.data.alerts?.length ?? 0,
-      prediction: prediction.data
-    }
+    const data = {}
+    if (results[0].status === 'fulfilled') data.accidentCount = results[0].value.data.features?.length ?? 0
+    else data.accidentCount = 0
+    if (results[1].status === 'fulfilled') {
+      data.trafficCount = results[1].value.data.segments?.length ?? 0
+      data.congestionLevel = results[1].value.data.segments?.filter(s => s.color === 'red').length ?? 0
+    } else { data.trafficCount = 0; data.congestionLevel = 0 }
+    if (results[2].status === 'fulfilled') data.weather = results[2].value.data
+    else data.weather = null
+    if (results[3].status === 'fulfilled') data.alertCount = results[3].value.data.alerts?.length ?? 0
+    else data.alertCount = 0
+    if (results[4].status === 'fulfilled') data.prediction = results[4].value.data
+    else data.prediction = null
+    const hasErrors = results.some(r => r.status === 'rejected')
+    return { ...data, dataFreshness: hasErrors ? 'degraded' : 'ok' }
   } catch (error) {
     return rejectWithValue(error.message)
   }
@@ -51,7 +58,7 @@ const dashboardSlice = createSlice({
         state.loading = false
         state.data = action.payload
         state.lastUpdate = new Date().toISOString()
-        state.dataFreshness = 'ok'
+        state.dataFreshness = action.payload.dataFreshness || 'ok'
       })
       .addCase(fetchDashboard.rejected, (state, action) => {
         state.loading = false

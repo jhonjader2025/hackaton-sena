@@ -2,17 +2,17 @@ export default function MetricCard({ label, value, unit, trend, trendLabel, icon
   if (loading) {
     return (
       <div className="card p-5 animate-pulse">
-        <div className="h-3 w-20 rounded bg-surface-200" />
-        <div className="mt-3 h-8 w-16 rounded bg-surface-200" />
+        <div className="h-3 w-20 rounded" style={{ backgroundColor: 'var(--color-surface-hover)' }} />
+        <div className="mt-3 h-8 w-16 rounded" style={{ backgroundColor: 'var(--color-surface-hover)' }} />
       </div>
     )
   }
 
   const colorMap = {
-    primary: { dot: 'bg-primary-500', text: 'text-primary-600', bg: 'bg-primary-50' },
-    success: { dot: 'bg-emerald-500', text: 'text-emerald-600', bg: 'bg-emerald-50' },
-    warning: { dot: 'bg-amber-500', text: 'text-amber-600', bg: 'bg-amber-50' },
-    danger: { dot: 'bg-red-500', text: 'text-red-600', bg: 'bg-red-50' }
+    primary: { text: 'var(--color-primary)' },
+    success: { text: 'var(--color-success)' },
+    warning: { text: 'var(--color-warning)' },
+    danger: { text: 'var(--color-danger)' }
   }
 
   const c = colorMap[color] || colorMap.primary
@@ -23,19 +23,19 @@ export default function MetricCard({ label, value, unit, trend, trendLabel, icon
         <div className="min-w-0">
           <p className="kpi-label">{label}</p>
           <div className="mt-1 flex items-baseline gap-1">
-            <span className="kpi-value">{value ?? '---'}</span>
-            {unit && <span className="text-sm font-medium text-surface-400">{unit}</span>}
+            <span className="kpi-value" style={{ color: 'var(--color-text)' }}>{value ?? '---'}</span>
+            {unit && <span className="text-sm font-medium" style={{ color: 'var(--color-text-muted)' }}>{unit}</span>}
           </div>
         </div>
         {icon && (
-          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${c.bg}`}>
-            <svg className={`h-5 w-5 ${c.text}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg" style={{ backgroundColor: 'var(--color-surface-hover)' }}>
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} style={{ color: c.text }}>
               <path strokeLinecap="round" strokeLinejoin="round" d={icon} />
             </svg>
           </div>
         )}
       </div>
-      {trend !== undefined && (
+      {trend !== undefined && trend !== null && (
         <div className="mt-3 flex items-center gap-1.5">
           <span className={`inline-flex items-center gap-0.5 text-xs font-medium ${
             trend >= 0 ? 'text-emerald-600' : 'text-red-600'
@@ -45,7 +45,7 @@ export default function MetricCard({ label, value, unit, trend, trendLabel, icon
             </svg>
             {Math.abs(trend).toFixed(1)}%
           </span>
-          {trendLabel && <span className="text-2xs text-surface-500">{trendLabel}</span>}
+          {trendLabel && <span className="text-2xs" style={{ color: 'var(--color-text-secondary)' }}>{trendLabel}</span>}
         </div>
       )}
     </div>

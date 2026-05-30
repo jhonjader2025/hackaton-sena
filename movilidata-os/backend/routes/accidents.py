@@ -1,10 +1,9 @@
 import os
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from models import Accident
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from fastapi import HTTPException
 from pathlib import Path
 import csv, json
 
@@ -22,13 +21,43 @@ def get_db():
         db.close()
 
 @router.get('/api/accidents')
-def get_accidents(fecha_inicio: str = None, fecha_fin: str = None, db: Session = Depends(get_db)):
-    q = db.query(Accident)
+def get_accidents(
+    q: str = Query(None, description='Búsqueda textual (comuna, tipo, descripción)'),
+    limit: int = Query(None, description='Máximo de resultados', ge=1, le=10000),
+    offset: int = Query(0, description='Desplazamiento', ge=0),
+    fecha_inicio: str = Query(None, description='Filtro fecha inicio (YYYY-MM-DD)'),
+    fecha_fin: str = Query(None, description='Filtro fecha fin (YYYY-MM-DD)'),
+    comuna: str = Query(None, description='Filtrar por comuna'),
+    tipo: str = Query(None, description='Filtrar por tipo de accidente'),
+    db: Session = Depends(get_db)
+):
+    query = db.query(Accident)
+
+    if q:
+        search = f'%{q}%'
+        query = query.filter(
+            Accident.comuna.ilike(search) |
+            Accident.tipo.ilike(search) |
+            Accident.fuente.ilike(search)
+        )
     if fecha_inicio:
-        q = q.filter(Accident.fecha >= fecha_inicio)
+        query = query.filter(Accident.fecha >= fecha_inicio)
     if fecha_fin:
-        q = q.filter(Accident.fecha <= fecha_fin)
-    rows = q.limit(10000).all()
+        query = query.filter(Accident.fecha <= fecha_fin)
+    if comuna:
+        query = query.filter(Accident.comuna.ilike(f'%{comuna}%'))
+    if tipo:
+        query = query.filter(Accident.tipo.ilike(f'%{tipo}%'))
+
+    total = query.count()
+
+    query = query.order_by(Accident.fecha.desc()).offset(offset)
+    if limit:
+        query = query.limit(limit)
+    else:
+        query = query.limit(10000)
+
+    rows = query.all()
     features = []
     for r in rows:
         features.append({
@@ -47,4 +76,10 @@ def get_accidents(fecha_inicio: str = None, fecha_fin: str = None, db: Session =
                 'coordinates': [r.lon, r.lat]
             }
         })
-    return {'type': 'FeatureCollection', 'features': features}
+    return {
+        'type': 'FeatureCollection',
+        'features': features,
+        'total': total,
+        'offset': offset,
+        'returned': len(features)
+    }

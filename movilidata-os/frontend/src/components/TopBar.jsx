@@ -40,11 +40,18 @@ export default function TopBar() {
       .catch(() => setSearchResults([]))
   }
 
+  const handleSearchSelect = (item) => {
+    const comuna = item.properties?.comuna || 'ubicación'
+    dispatch({ type: 'ui/setActiveTab', payload: 'accidentes' })
+    setShowSearch(false)
+    setSearchQuery('')
+  }
+
   return (
     <header
       className="sticky top-0 z-20 border-b backdrop-blur-md"
       style={{
-        backgroundColor: 'color-mix(in srgb, var(--color-surface) 95%, transparent)',
+        backgroundColor: 'var(--color-surface)',
         borderColor: 'var(--color-border)'
       }}
     >
@@ -93,41 +100,58 @@ export default function TopBar() {
               aria-label="Buscar accidentes"
             />
 
-            {showSearch && searchResults.length > 0 && (
+            {showSearch && (
               <div
-                className="absolute top-full mt-1 w-full rounded-lg border shadow-lg overflow-hidden"
+                className="absolute top-full mt-1 w-full rounded-lg border shadow-lg overflow-hidden z-50"
                 style={{
                   backgroundColor: 'var(--color-surface)',
                   borderColor: 'var(--color-border)'
                 }}
               >
-                {searchResults.slice(0, 5).map((item, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    className="w-full px-3 py-2 text-left text-sm transition-colors"
-                    style={{ color: 'var(--color-text)' }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-surface-hover)'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                  >
-                    <span className="font-medium">{item.properties?.comuna || 'Sin comuna'}</span>
-                    <span className="ml-2" style={{ color: 'var(--color-text-muted)' }}>
-                      {item.properties?.tipo} · {item.properties?.fecha?.split(' ')[0]}
-                    </span>
-                  </button>
-                ))}
+                {searchResults.length > 0 ? (
+                  searchResults.map((item, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => handleSearchSelect(item)}
+                      className="w-full px-3 py-2 text-left text-sm transition-colors hover:bg-surface-hover"
+                      style={{ color: 'var(--color-text)' }}
+                    >
+                      <span className="font-medium">{item.properties?.comuna || 'Sin comuna'}</span>
+                      <span className="ml-2" style={{ color: 'var(--color-text-muted)' }}>
+                        {item.properties?.tipo} · {item.properties?.fecha?.split(' ')[0]}
+                      </span>
+                    </button>
+                  ))
+                ) : searchQuery.length >= 2 ? (
+                  <div className="px-3 py-4 text-sm text-center" style={{ color: 'var(--color-text-muted)' }}>
+                    Sin resultados para "{searchQuery}"
+                  </div>
+                ) : searchQuery.length > 0 ? (
+                  <div className="px-3 py-4 text-sm text-center" style={{ color: 'var(--color-text-muted)' }}>
+                    Escribe al menos 2 caracteres para buscar
+                  </div>
+                ) : null}
               </div>
             )}
           </div>
 
           {/* Status indicators */}
-          {weatherInfo && (
+          {weatherInfo ? (
             <div className="hidden lg:flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium"
               style={{ backgroundColor: 'var(--color-primary-bg)', color: 'var(--color-primary)' }}>
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15a4.5 4.5 0 004.5 4.5H18a3.75 3.75 0 001.332-7.257 3 3 0 00-3.758-3.848 5.25 5.25 0 00-10.233 2.33A4.502 4.502 0 002.25 15z" />
               </svg>
               {weatherInfo}
+            </div>
+          ) : (
+            <div className="hidden lg:flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium"
+              style={{ backgroundColor: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}>
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              Sin datos clima
             </div>
           )}
 

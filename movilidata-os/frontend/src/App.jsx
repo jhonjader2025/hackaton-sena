@@ -13,6 +13,7 @@ import Prediction from './components/Prediction'
 import Assistant from './components/Assistant'
 import AlertsHistory from './components/AlertsHistory'
 import ToastContainer from './components/ToastContainer'
+import ErrorBoundary from './components/ErrorBoundary'
 
 const THEME_META = document.querySelector('meta[name="theme-color"]')
 
@@ -85,12 +86,12 @@ export default function App() {
             className="flex-1 overflow-auto p-4 lg:p-6 space-y-6"
             role="main"
           >
-            {activeTab === 'dashboard' && <Dashboard openDetail={openDetail} />}
-            {activeTab === 'accidentes' && <HeatmapAccidents openDetail={openDetail} />}
-            {activeTab === 'trafico' && <TrafficMonitor openDetail={openDetail} />}
-            {activeTab === 'prediccion' && <Prediction />}
-            {activeTab === 'rutas' && <SafeRoute />}
-            {activeTab === 'asistente' && <Assistant />}
+            {activeTab === 'dashboard' && <ErrorBoundary><Dashboard openDetail={openDetail} /></ErrorBoundary>}
+            {activeTab === 'accidentes' && <ErrorBoundary><HeatmapAccidents openDetail={openDetail} /></ErrorBoundary>}
+            {activeTab === 'trafico' && <ErrorBoundary><TrafficMonitor openDetail={openDetail} /></ErrorBoundary>}
+            {activeTab === 'prediccion' && <ErrorBoundary><Prediction /></ErrorBoundary>}
+            {activeTab === 'rutas' && <ErrorBoundary><SafeRoute /></ErrorBoundary>}
+            {activeTab === 'asistente' && <ErrorBoundary><Assistant /></ErrorBoundary>}
           </main>
         </div>
       </div>

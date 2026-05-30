@@ -3,10 +3,10 @@ import { useSelector, useDispatch } from 'react-redux'
 import { removeNotification } from '../redux/slices/uiSlice'
 
 const typeStyles = {
-  success: 'border-emerald-200 bg-emerald-50',
-  error: 'border-red-200 bg-red-50',
-  warning: 'border-amber-200 bg-amber-50',
-  info: 'border-sky-200 bg-sky-50'
+  success: { border: 'var(--color-success-bg)', bg: 'var(--color-success-bg)' },
+  error: { border: 'var(--color-danger-bg)', bg: 'var(--color-danger-bg)' },
+  warning: { border: 'var(--color-warning-bg)', bg: 'var(--color-warning-bg)' },
+  info: { border: 'var(--color-primary-bg)', bg: 'var(--color-primary-bg)' }
 }
 
 const typeIcons = {
@@ -16,8 +16,11 @@ const typeIcons = {
   info: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
 }
 
-const typeTextColors = {
-  success: 'text-emerald-800', error: 'text-red-800', warning: 'text-amber-800', info: 'text-sky-800'
+const COLORS = {
+  success: { icon: '#059669', text: '#059669' },
+  error: { icon: '#DC2626', text: '#DC2626' },
+  warning: { icon: '#D97706', text: '#D97706' },
+  info: { icon: '#2563EB', text: '#2563EB' }
 }
 
 export default function ToastContainer() {
@@ -36,30 +39,40 @@ export default function ToastContainer() {
 
   return (
     <div className="fixed right-4 top-4 z-50 flex flex-col gap-2 md:right-6 md:top-6" role="alert" aria-live="polite">
-      {notifications.map((n) => (
-        <div
-          key={n.id}
-          className={`flex items-start gap-3 rounded-lg border px-4 py-3 shadow-lg backdrop-blur-sm transition-all min-w-[280px] max-w-[400px] ${typeStyles[n.type] || typeStyles.info}`}
-        >
-          <svg className={`h-5 w-5 shrink-0 mt-0.5 ${typeTextColors[n.type]}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d={typeIcons[n.type] || typeIcons.info} />
-          </svg>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-surface-900">{n.title}</p>
-            <p className="text-xs text-surface-600">{n.message}</p>
-          </div>
-          <button
-            type="button"
-            onClick={() => dispatch(removeNotification(n.id))}
-            className="shrink-0 rounded p-1 text-surface-400 hover:text-surface-600 hover:bg-surface-200/50"
-            aria-label="Cerrar notificación"
+      {notifications.map((n) => {
+        const style = typeStyles[n.type] || typeStyles.info
+        const color = COLORS[n.type] || COLORS.info
+        return (
+          <div
+            key={n.id}
+            className="flex items-start gap-3 rounded-lg border px-4 py-3 shadow-lg backdrop-blur-sm transition-all min-w-[280px] max-w-[400px]"
+            style={{
+              backgroundColor: style.bg,
+              borderColor: style.border,
+              color: 'var(--color-text)'
+            }}
           >
-            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            <svg className="h-5 w-5 shrink-0 mt-0.5" style={{ color: color.icon }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d={typeIcons[n.type] || typeIcons.info} />
             </svg>
-          </button>
-        </div>
-      ))}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>{n.title}</p>
+              <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{n.message}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => dispatch(removeNotification(n.id))}
+              className="shrink-0 rounded p-1"
+              style={{ color: 'var(--color-text-muted)' }}
+              aria-label="Cerrar notificación"
+            >
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        )
+      })}
     </div>
   )
 }

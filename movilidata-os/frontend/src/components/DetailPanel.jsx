@@ -36,19 +36,24 @@ export default function DetailPanel({ open, onClose, title, children }) {
         role="dialog"
         aria-modal="true"
         aria-label={title || 'Panel de detalles'}
-        className={`fixed right-0 top-0 z-50 h-full w-full max-w-md border-l border-surface-200 bg-white shadow-xl transition-transform duration-300 ${
+        className={`fixed right-0 top-0 z-50 h-full w-full max-w-md border-l shadow-xl transition-transform duration-300 ${
           open ? 'translate-x-0' : 'translate-x-full'
         }`}
+        style={{
+          backgroundColor: 'var(--color-surface)',
+          borderColor: 'var(--color-border)'
+        }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 h-16 border-b border-surface-200">
-          <h2 className="text-base font-semibold text-surface-900 truncate">
+        <div className="flex items-center justify-between px-5 h-16 border-b" style={{ borderColor: 'var(--color-border)' }}>
+          <h2 className="text-base font-semibold truncate" style={{ color: 'var(--color-text)' }}>
             {title || 'Detalles'}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-2 text-surface-400 hover:bg-surface-100 hover:text-surface-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            className="rounded-lg p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+            style={{ color: 'var(--color-text-muted)' }}
             aria-label="Cerrar panel"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -62,10 +67,10 @@ export default function DetailPanel({ open, onClose, title, children }) {
           {children || (
             <div className="flex h-full items-center justify-center">
               <div className="text-center">
-                <svg className="mx-auto h-12 w-12 text-surface-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                <svg className="mx-auto h-12 w-12" style={{ color: 'var(--color-text-muted)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <p className="mt-3 text-sm text-surface-500">Selecciona un elemento en el mapa para ver sus detalles</p>
+                <p className="mt-3 text-sm" style={{ color: 'var(--color-text-secondary)' }}>Selecciona un elemento en el mapa para ver sus detalles</p>
               </div>
             </div>
           )}
